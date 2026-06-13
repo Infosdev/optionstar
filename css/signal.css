@@ -1,0 +1,53 @@
+/* TRADE SIGNAL CARD */
+.signal-card{border-radius:11px;border:2px solid var(--primary);background:var(--card);padding:10px 13px;margin-bottom:8px;box-shadow:0 4px 20px rgba(108,99,255,.15);transition:all .4s}
+.signal-card.bull-signal{border-color:var(--green);box-shadow:0 4px 24px rgba(40,167,69,.28)}
+.signal-card.bear-signal{border-color:var(--red);box-shadow:0 4px 24px rgba(220,53,69,.28)}
+.signal-card.wait-signal{border-color:var(--yellow);box-shadow:0 4px 24px rgba(230,168,23,.2)}
+.signal-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.signal-icon{font-size:22px;line-height:1}
+.signal-label{font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.signal-action{font-size:18px;font-weight:900;letter-spacing:1.5px}
+.signal-action.bull{color:var(--green)}.signal-action.bear{color:var(--red)}.signal-action.wait{color:var(--yellow)}
+.signal-conf{font-size:11px;padding:2px 9px;border-radius:10px;font-weight:700;background:var(--tab-bg)}
+.signal-conf.high{background:rgba(40,167,69,.15);color:var(--green)}
+.signal-conf.med{background:rgba(230,168,23,.15);color:var(--yellow)}
+.signal-conf.low{background:rgba(108,117,125,.12);color:#888}
+.signal-time{font-size:9px;color:#aaa;margin-left:auto;white-space:nowrap}
+.sig-prices{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.sig-blk{flex:1;min-width:75px;border-radius:8px;padding:7px 8px;text-align:center;background:var(--tab-bg)}
+.sig-blk.tp{background:rgba(40,167,69,.1);border:1px solid rgba(40,167,69,.25)}
+.sig-blk.sl{background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.25)}
+.sig-blk.rr{background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.25)}
+.sig-blk.entry{background:var(--tab-bg);border:1px solid var(--border)}
+.sb-lbl{display:block;font-size:8px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.sb-val{display:block;font-size:17px;font-weight:800;line-height:1}
+.sig-blk.tp .sb-val{color:var(--green)}.sig-blk.sl .sb-val{color:var(--red)}.sig-blk.rr .sb-val{color:var(--primary)}
+.sb-sub{display:block;font-size:10px;font-weight:600;margin-top:1px}
+.sig-blk.tp .sb-sub{color:var(--green)}.sig-blk.sl .sb-sub{color:var(--red)}
+.sig-nifty{font-size:10px;color:#888;margin-bottom:6px;display:flex;gap:12px;flex-wrap:wrap}
+.sig-nifty span b{color:var(--text);font-weight:700}
+.sig-nifty span.tp-lvl b{color:var(--green)}.sig-nifty span.sl-lvl b{color:var(--red)}
+.sig-ltp-line{display:flex;align-items:center;gap:7px;margin-bottom:7px;padding:5px 10px;background:var(--tab-bg);border-radius:8px;border:1px solid var(--border)}
+.sig-sym-lbl{font-weight:700;font-size:11px;color:var(--primary)}
+.sig-ltp-sep{font-size:10px;color:#888;margin-left:auto}
+.sig-ltp-val{font-size:17px;font-weight:800;color:var(--text)}
+.sig-blk.trigger{background:rgba(108,99,255,.13);border:2px solid var(--primary)!important}
+.sig-blk.trigger .sb-lbl{color:var(--primary);font-size:9px}
+.sig-blk.trigger .sb-val{color:var(--primary)}
+.sig-blk.trigger-bear{background:rgba(220,53,69,.1);border:2px solid var(--red)!important}
+.sig-blk.trigger-bear .sb-lbl{color:var(--red);font-size:9px}
+.sig-blk.trigger-bear .sb-val{color:var(--red)}
+.sig-reasons{display:flex;flex-wrap:wrap;gap:4px}
+.sig-rsn{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--tab-bg);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;gap:3px}
+
+/* MULTI-TF SIGNAL PANEL */
+.mtf-panel{background:var(--card);border-radius:9px;padding:8px 10px;border:1px solid var(--border);margin-bottom:7px;box-shadow:var(--shadow)}
+.mtf-panel h4{font-size:10px;font-weight:700;color:var(--primary);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.mtf-grid{display:flex;gap:6px}
+.mtf-cell{flex:1;border-radius:7px;padding:6px 8px;text-align:center;background:var(--tab-bg);border:1px solid var(--border)}
+.mtf-cell.bull{background:rgba(40,167,69,.1);border-color:var(--green)}
+.mtf-cell.bear{background:rgba(220,53,69,.1);border-color:var(--red)}
+.mtf-cell.wait{background:rgba(230,168,23,.1);border-color:var(--yellow)}
+.mtf-tf{font-size:8px;color:#888;font-weight:600;text-transform:uppercase}
+.mtf-sig{font-size:10px;font-weight:800;margin:2px 0}
+.mtf-conf{font-size:9px;color:#888}

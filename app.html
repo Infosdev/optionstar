@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OptionStar — Quant Empowered Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/charts.css">
+<link rel="stylesheet" href="css/signal.css">
+<link rel="stylesheet" href="css/panels.css">
+<link rel="stylesheet" href="css/journal.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo-text">⭐ OptionStar</div>
+    <div class="index-boxes">
+      <div class="idx-box neu" id="nifty-box"><div class="idx-name">NIFTY 50</div><div class="idx-price" id="nifty-price">--</div><div class="idx-chg" id="nifty-chg">Loading...</div></div>
+      <div class="idx-box neu" id="bnf-box"><div class="idx-name">BANKNIFTY</div><div class="idx-price" id="bnf-price">--</div><div class="idx-chg" id="bnf-chg">Loading...</div></div>
+      <div class="idx-box neu" id="fn-box"><div class="idx-name">FINNIFTY</div><div class="idx-price" id="fn-price">--</div><div class="idx-chg" id="fn-chg">Loading...</div></div>
+      <div class="idx-box neu" id="sx-box"><div class="idx-name">SENSEX</div><div class="idx-price" id="sx-price">--</div><div class="idx-chg" id="sx-chg">Loading...</div></div>
+    </div>
+    <div class="top-actions">
+      <span class="user-tag" id="userTag">--</span>
+      <button class="icon-btn refresh-btn" onclick="manualRefresh()" title="Refresh Data"><i class="fas fa-sync-alt" id="refreshIcon"></i></button>
+      <button class="icon-btn" onclick="toggleSettings()" title="Settings"><i class="fas fa-cog"></i></button>
+      <button class="icon-btn" onclick="toggleDarkMode()" id="themeBtn" title="Theme"><i class="fas fa-moon"></i></button>
+      <button class="icon-btn danger" onclick="logout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-msg" id="statusMsg">Initializing...</span>
+    <span class="data-src" id="dataSrcBadge"></span>
+    <span class="status-time" id="statusTime"></span>
+  </div>
+
+  <!-- MAIN BODY -->
+  <div class="main-body">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel" id="leftPanel">
+      <div class="section-title">Index</div>
+      <div class="idx-switch">
+        <button class="idx-sw-btn active" id="sw-NIFTY" onclick="switchIndex('NIFTY')">NIFTY</button>
+        <button class="idx-sw-btn" id="sw-BANKNIFTY" onclick="switchIndex('BANKNIFTY')">BANKNIFTY</button>
+        <button class="idx-sw-btn" id="sw-FINNIFTY" onclick="switchIndex('FINNIFTY')">FINNIFTY</button>
+      </div>
+      <div class="section-title">Symbol Search</div>
+      <div class="search-wrap">
+        <input type="text" id="symbolSearch" placeholder="Search symbol..." oninput="searchSymbol(this.value)" onblur="hideSugg()">
+        <i class="fas fa-search search-icon"></i>
+        <div class="suggestions-box" id="suggBox" style="display:none"></div>
+      </div>
+      <div class="sym-display">
+        <div class="sym-tag ce" id="sym1Tag">NIFTY MAY CE</div>
+        <div class="sym-tag pe" id="sym2Tag">NIFTY MAY PE</div>
+      </div>
+
+      <div class="section-title">
+        Expiry
+        <span id="underlyingVal" style="font-size:9px;color:var(--green);font-weight:700"></span>
+      </div>
+      <div class="expiry-row" id="expiryRow">
+        <span style="font-size:10px;color:#888">Loading expiries...</span>
+      </div>
+
+      <div class="section-title" id="chainTitle">Options Chain — NIFTY</div>
+      <div style="max-height:300px;overflow-y:auto">
+        <table class="chain-table">
+          <thead><tr><th>CE LTP</th><th>OI(L)</th><th>Strike</th><th>OI(L)</th><th>PE LTP</th></tr></thead>
+          <tbody id="chainBody"></tbody>
+        </table>
+      </div>
+
+      <div class="oi-chart-wrap">
+        <h4>📊 OI by Strike — CE vs PE</h4>
+        <div id="oiBarChart"></div>
+      </div>
+
+      <div class="section-title">
+        POC History
+        <button style="background:none;border:1px solid var(--red);color:var(--red);border-radius:3px;padding:1px 5px;font-size:9px;cursor:pointer;font-family:Poppins,sans-serif" onclick="clearPocHistory()">Clear</button>
+      </div>
+      <div style="max-height:160px;overflow-y:auto">
+        <table class="poc-table">
+          <thead><tr><th>Call POC</th><th>Put POC</th><th>Straddle</th><th>Time</th></tr></thead>
+          <tbody id="pocBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="divider" id="divider"><div class="divider-handle"></div></div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="chartTabBtn" onclick="switchTab('chart')">📊 Dual Chart</button>
+        <button class="tab-btn" id="orderTabBtn" onclick="switchTab('order')">📋 Order Print</button>
+        <button class="tab-btn" id="journalTabBtn" onclick="switchTab('journal')">📓 Journal</button>
+        <div class="tab-spacer"></div>
+        <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:9px;color:#888">TF:</span>
+          <button class="tf-btn" onclick="setTF(1,this)">1m</button>
+          <button class="tf-btn" onclick="setTF(2,this)">2m</button>
+          <button class="tf-btn active" onclick="setTF(5,this)">5m</button>
+          <button class="tf-btn" onclick="setTF(10,this)">10m</button>
+          <button class="tf-btn" onclick="setTF(15,this)">15m</button>
+          <button class="tf-btn" onclick="setTF(30,this)">30m</button>
+        </div>
+        <div style="display:flex;gap:3px;margin-left:5px">
+          <button class="ct-btn active" onclick="setChartType('candlestick',this)">Candle</button>
+          <button class="ct-btn" onclick="setChartType('line',this)">Line</button>
+          <button class="ct-btn" onclick="setChartType('heikinashi',this)">HA</button>
+        </div>
+      </div>
+
+      <!-- CHART TAB -->
+      <div class="chart-tab" id="chartTab">
+        <div class="metrics-row">
+          <div class="metric-card call"><div class="m-label">Call LTP</div><div class="m-value" id="callLTP">--</div><div class="m-sub">VWAP: <span id="callVwapDisp">--</span></div></div>
+          <div class="metric-card call"><div class="m-label">Call POC</div><div class="m-value" id="callPocDisp">--</div><div class="m-sub">OI: <span id="callOIDisp">--</span></div></div>
+          <div class="metric-card put"><div class="m-label">Put LTP</div><div class="m-value" id="putLTP">--</div><div class="m-sub">VWAP: <span id="putVwapDisp">--</span></div></div>
+          <div class="metric-card put"><div class="m-label">Put POC</div><div class="m-value" id="putPocDisp">--</div><div class="m-sub">OI: <span id="putOIDisp">--</span></div></div>
+          <div class="metric-card straddle"><div class="m-label">Straddle VWAP</div><div class="m-value" id="straddleDisp">--</div><div class="m-sub">LTP: <span id="straddleLTP">--</span></div></div>
+        </div>
+
+        <div class="badge-row" id="badgeRow">
+          <div class="badge neu" id="trendBadge">-- TREND</div>
+          <div class="badge neu" id="msvBadge">-- MSV</div>
+          <div class="badge neu" id="dstrBadge">DSTR: --</div>
+          <div class="badge neu" id="xrpBadge">XRP: --</div>
+          <div class="badge neu" id="vixBadge">VIX: --</div>
+          <div class="badge pcr" id="pcrBadge">PCR: --</div>
+          <div class="badge mp" id="mpBadge">MaxPain: --</div>
+          <div class="badge ivr" id="ivrBadge">IVR: --</div>
+        </div>
+
+        <!-- AI TRADE SIGNAL CARD -->
+        <div class="signal-card" id="signalCard">
+          <div class="signal-header">
+            <span class="signal-icon" id="sigIcon">🎯</span>
+            <div style="flex:1">
+              <div class="signal-label">AI Prediction</div>
+              <div class="signal-action wait" id="sigAction">ANALYZING...</div>
+            </div>
+            <span class="signal-conf" id="sigConf">-- %</span>
+            <span class="signal-time" id="sigTime">--</span>
+          </div>
+          <div class="sig-ltp-line">
+            <span class="sig-sym-lbl" id="sigStrike">NIFTY -- CE</span>
+            <span class="sig-ltp-sep">Current LTP:</span>
+            <span class="sig-ltp-val" id="sigCurLTP">--</span>
+          </div>
+          <div class="sig-prices">
+            <div class="sig-blk trigger" id="sigTriggerBlk">
+              <span class="sb-lbl" id="sigTriggerLbl">BUY ABOVE</span>
+              <span class="sb-val" id="sigEntry">--</span>
+              <span class="sb-sub" id="sigTPGain" style="color:var(--primary)">+-- from LTP</span>
+            </div>
+            <div class="sig-blk tp">
+              <span class="sb-lbl">Take Profit</span>
+              <span class="sb-val" id="sigTP">--</span>
+              <span class="sb-sub" id="sigSLLoss">+-- pts</span>
+            </div>
+            <div class="sig-blk sl">
+              <span class="sb-lbl">Stop Loss</span>
+              <span class="sb-val" id="sigSL">--</span>
+              <span class="sb-sub" id="sigTPGain2">--- pts</span>
+            </div>
+            <div class="sig-blk rr">
+              <span class="sb-lbl">Risk:Reward</span>
+              <span class="sb-val" id="sigRR">--</span>
+              <span class="sb-sub" style="color:#888">ratio</span>
+            </div>
+          </div>
+          <div class="sig-nifty">
+            <span class="tp-lvl">NIFTY TP: <b id="sigNTP">--</b></span>
+            <span class="sl-lvl">NIFTY SL: <b id="sigNSL">--</b></span>
+            <span>Lot P&amp;L: TP <b id="sigLotTP" style="color:var(--green)">--</b> / SL <b id="sigLotSL" style="color:var(--red)">--</b></span>
+          </div>
+          <div class="sig-reasons" id="sigReasons">
+            <span class="sig-rsn">⏳ Waiting for data...</span>
+          </div>
+        </div>
+
+        <!-- MULTI-TF SIGNAL PANEL -->
+        <div class="mtf-panel">
+          <h4>⏱️ Multi-Timeframe Confluence</h4>
+          <div class="mtf-grid" id="mtfGrid">
+            <div class="mtf-cell wait" id="mtf-5"><div class="mtf-tf">5 min</div><div class="mtf-sig wait" id="mtf-5-sig">--</div><div class="mtf-conf" id="mtf-5-conf">--</div></div>
+            <div class="mtf-cell wait" id="mtf-15"><div class="mtf-tf">15 min</div><div class="mtf-sig wait" id="mtf-15-sig">--</div><div class="mtf-conf" id="mtf-15-conf">--</div></div>
+            <div class="mtf-cell wait" id="mtf-30"><div class="mtf-tf">30 min</div><div class="mtf-sig wait" id="mtf-30-sig">--</div><div class="mtf-conf" id="mtf-30-conf">--</div></div>
+            <div class="mtf-cell wait" id="mtf-conf-cell"><div class="mtf-tf">Confluence</div><div class="mtf-sig" id="mtf-overall">--</div><div class="mtf-conf" id="mtf-agree">-- agreeing</div></div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-wrap">
+            <div class="chart-header">
+              <span class="chart-title ce-title" id="ceSymTitle">-- CE</span>
+              <div class="chart-stats">
+                <div class="chart-stat"><span class="s-label">VWAP</span><span class="s-val" id="ceVwapStat" style="color:var(--green)">--</span></div>
+                <div class="chart-stat"><span class="s-label">POC</span><span class="s-val" id="cePocStat" style="color:var(--green)">--</span></div>
+                <div class="chart-stat"><span class="s-label">IV%</span><span class="s-val" id="ceIVStat" style="color:#888">--</span></div>
+              </div>
+            </div>
+            <div id="chart-container"></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-header">
+              <span class="chart-title pe-title" id="peSymTitle">-- PE</span>
+              <div class="chart-stats">
+                <div class="chart-stat"><span class="s-label">VWAP</span><span class="s-val" id="peVwapStat" style="color:var(--red)">--</span></div>
+                <div class="chart-stat"><span class="s-label">POC</span><span class="s-val" id="pePocStat" style="color:var(--red)">--</span></div>
+                <div class="chart-stat"><span class="s-label">IV%</span><span class="s-val" id="peIVStat" style="color:#888">--</span></div>
+              </div>
+            </div>
+            <div id="chart-container2"></div>
+          </div>
+        </div>
+
+        <div class="vol-section">
+          <div class="vol-card">
+            <div class="vol-label">📞 Call OI Power: <span id="callPower" style="color:var(--green);font-weight:700">--</span></div>
+            <div class="vol-bar-outer"><div class="vol-bar-inner" id="callVolBar" style="width:50%;background:var(--green)"></div></div>
+          </div>
+          <div class="vol-card">
+            <div class="vol-label">📤 Put OI Power: <span id="putPower" style="color:var(--red);font-weight:700">--</span></div>
+            <div class="vol-bar-outer"><div class="vol-bar-inner" id="putVolBar" style="width:50%;background:var(--red)"></div></div>
+          </div>
+        </div>
+
+        <div class="analysis-row">
+          <div class="commentary-card">
+            <h3>📝 Market Commentary <span style="font-size:8px;color:#aaa;font-weight:400" id="commTime">--</span></h3>
+            <div class="commentary-grid" id="commGrid">
+              <div class="c-item"><span class="c-key">MSV</span><span class="c-val" id="c-msv">--</span></div>
+              <div class="c-item"><span class="c-key">STR</span><span class="c-val" id="c-str">--</span></div>
+              <div class="c-item"><span class="c-key">Call POC</span><span class="c-val" id="c-cpoc">--</span></div>
+              <div class="c-item"><span class="c-key">Put POC</span><span class="c-val" id="c-ppoc">--</span></div>
+              <div class="c-item"><span class="c-key">SMI</span><span class="c-val" id="c-smi">--</span></div>
+              <div class="c-item"><span class="c-key">Straddle</span><span class="c-val" id="c-str2">--</span></div>
+              <div class="c-item"><span class="c-key">XRP</span><span class="c-val" id="c-xrp">--</span></div>
+              <div class="c-item"><span class="c-key">VIX</span><span class="c-val" id="c-vix">--</span></div>
+              <div class="c-item" style="grid-column:1/-1"><span class="c-key">Signal</span><span class="c-val" id="c-signal">--</span></div>
+            </div>
+            <div class="final-signal" id="finalSignal" style="background:var(--tab-bg)">Analyzing market...</div>
+          </div>
+          <div class="sentiment-card">
+            <h3>🎯 Sentiment</h3>
+            <div class="sent-score" id="sentScore" style="color:var(--yellow)">--</div>
+            <div class="sent-bar"><div class="sent-fill" id="sentFill" style="width:50%"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:8px;color:#888;margin-top:1px"><span>BULL</span><span>BEAR</span></div>
+            <div class="sent-label" id="sentLabel">--</div>
+            <div class="sent-entry" id="sentEntry">--</div>
+            <div style="margin-top:7px">
+              <div class="sig-row"><span>Call Strength</span><div class="sig-mini-bar"><div class="sig-mini-fill" id="ceSignalBar" style="background:var(--green)"></div></div></div>
+              <div class="sig-row"><span>Put Strength</span><div class="sig-mini-bar"><div class="sig-mini-fill" id="peSignalBar" style="background:var(--red)"></div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="strategy-card">
+          <h3>🦅 Strategy Advisor — <span id="scenarioBadge" style="color:var(--yellow)">--</span></h3>
+          <table class="strategy-table">
+            <thead><tr><th>Strategy</th><th>Legs</th><th>Credit</th><th>Max Profit</th><th>Max Risk</th><th>Breakeven</th></tr></thead>
+            <tbody id="strategyBody"></tbody>
+          </table>
+        </div>
+
+        <!-- STRADDLE DECAY CHART -->
+        <div class="decay-card">
+          <h3>📉 Straddle Premium Decay — <span id="straddleLTPLive" style="color:var(--yellow)">--</span></h3>
+          <div id="straddleDecayChart"></div>
+        </div>
+
+      </div><!-- end chart-tab -->
+
+      <!-- ORDER PRINT TAB -->
+      <div class="order-tab" id="orderTab">
+        <div class="tape-grid">
+          <div class="tape-card">
+            <h3 class="ce-title" id="tape1Title">CE — Order Flow</h3>
+            <div style="max-height:450px;overflow-y:auto">
+              <table class="tape-table"><thead><tr><th>Time</th><th>Price</th><th>Volume</th><th>OrderPrint</th></tr></thead><tbody id="tape1Body"></tbody></table>
+            </div>
+          </div>
+          <div class="tape-card">
+            <h3 class="pe-title" id="tape2Title">PE — Order Flow</h3>
+            <div style="max-height:450px;overflow-y:auto">
+              <table class="tape-table"><thead><tr><th>Time</th><th>Price</th><th>Volume</th><th>OrderPrint</th></tr></thead><tbody id="tape2Body"></tbody></table>
+            </div>
+          </div>
+        </div>
+      <!-- TRADE JOURNAL TAB -->
+      <div class="journal-tab" id="journalTab">
+        <div class="journal-stats">
+          <div class="jstat"><div class="jstat-lbl">Total Trades</div><div class="jstat-val" id="j-total">0</div></div>
+          <div class="jstat"><div class="jstat-lbl">Win Rate</div><div class="jstat-val" id="j-wr" style="color:var(--green)">0%</div></div>
+          <div class="jstat"><div class="jstat-lbl">Total P&L</div><div class="jstat-val" id="j-pnl">₹0</div></div>
+          <div class="jstat"><div class="jstat-lbl">Best Trade</div><div class="jstat-val" id="j-best" style="color:var(--green)">₹0</div></div>
+          <div class="jstat"><div class="jstat-lbl">Worst Trade</div><div class="jstat-val" id="j-worst" style="color:var(--red)">₹0</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:7px">
+          <button onclick="clearJournal()" style="padding:4px 10px;background:var(--secondary);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:Poppins,sans-serif;font-size:10px;font-weight:600">🗑 Clear All</button>
+          <button onclick="exportJournal()" style="padding:4px 10px;background:var(--primary);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:Poppins,sans-serif;font-size:10px;font-weight:600">⬇ Export CSV</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="journal-table">
+            <thead><tr><th>Date/Time</th><th>Symbol</th><th>Action</th><th>Entry</th><th>Exit</th><th>Qty(Lots)</th><th>P&L</th><th>NIFTY</th></tr></thead>
+            <tbody id="journalBody"></tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GREEKS BAR -->
+  <div class="greeks-bar" id="greeksBar">
+    <span style="font-size:9px;font-weight:700;color:#888">GREEKS (ATM CE)</span>
+    <div class="greek-sep"></div>
+    <div class="greek-item"><div class="greek-lbl">Δ Delta</div><div class="greek-val ce" id="g-ce-delta">--</div></div>
+    <div class="greek-item"><div class="greek-lbl">Γ Gamma</div><div class="greek-val ce" id="g-ce-gamma">--</div></div>
+    <div class="greek-item"><div class="greek-lbl">Θ Theta</div><div class="greek-val ce" id="g-ce-theta">--</div></div>
+    <div class="greek-item"><div class="greek-lbl">V Vega</div><div class="greek-val ce" id="g-ce-vega">--</div></div>
+    <div class="greek-sep"></div>
+    <span style="font-size:9px;font-weight:700;color:#888">ATM PE</span>
+    <div class="greek-sep"></div>
+    <div class="greek-item"><div class="greek-lbl">Δ Delta</div><div class="greek-val pe" id="g-pe-delta">--</div></div>
+    <div class="greek-item"><div class="greek-lbl">Γ Gamma</div><div class="greek-val pe" id="g-pe-gamma">--</div></div>
+    <div class="greek-item"><div class="greek-lbl">Θ Theta</div><div class="greek-val pe" id="g-pe-theta">--</div></div>
+    <div class="greek-item"><div class="greek-lbl">V Vega</div><div class="greek-val pe" id="g-pe-vega">--</div></div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="sym-inputs">
+      <label>CE:</label><input type="text" id="ceInput" value="" style="width:130px">
+      <label>PE:</label><input type="text" id="peInput" value="" style="width:130px">
+      <button onclick="updateSymbols()" style="padding:4px 9px;background:var(--primary);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:Poppins,sans-serif;font-size:10px;font-weight:600">Update</button>
+    </div>
+    <div class="trade-btns">
+      <label style="font-size:10px;color:#888;font-weight:600">Qty:</label>
+      <input type="number" class="qty-input" id="qtyInput" value="1" min="1">
+      <button class="trade-btn btn-bc" onclick="placeTrade('BUY','CALL')"><i class="fas fa-shopping-cart"></i> BUY CALL</button>
+      <button class="trade-btn btn-sc" onclick="placeTrade('SELL','CALL')"><i class="fas fa-dollar-sign"></i> SELL CALL</button>
+      <button class="trade-btn btn-bp" onclick="placeTrade('BUY','PUT')"><i class="fas fa-shopping-cart"></i> BUY PUT</button>
+      <button class="trade-btn btn-sp" onclick="placeTrade('SELL','PUT')"><i class="fas fa-dollar-sign"></i> SELL PUT</button>
+    </div>
+    <div class="bottom-right">
+      <div class="pnl-display" id="pnlDisplay">P&amp;L: ₹0</div>
+      <button onclick="squareOff()" style="padding:5px 10px;background:var(--secondary);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:Poppins,sans-serif;font-size:10px;font-weight:600">Square Off</button>
+    </div>
+  </div>
+</div>
+
+<!-- INDICATOR PANEL -->
+<div class="indicator-panel" id="indicatorPanel">
+  <div style="font-size:10px;font-weight:700;margin-bottom:6px;color:var(--primary);display:flex;justify-content:space-between">
+    Indicators <span style="cursor:pointer" onclick="document.getElementById('indicatorPanel').style.display='none'">✕</span>
+  </div>
+  <div class="ind-item neu" id="ind-dstr"><span class="ind-label">DSTR</span><span class="ind-val">--</span></div>
+  <div class="ind-item neu" id="ind-smi"><span class="ind-label">SMI</span><span class="ind-val">--</span></div>
+  <div class="ind-item neu" id="ind-xrp"><span class="ind-label">XRP</span><span class="ind-val">--</span></div>
+  <div class="ind-item neu" id="ind-vix"><span class="ind-label">VIX</span><span class="ind-val">--</span></div>
+  <div class="ind-item neu" id="ind-poc"><span class="ind-label">POC Bias</span><span class="ind-val">--</span></div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-panel" id="settingsPanel">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <b style="font-size:14px">⚙️ Settings</b>
+    <span style="cursor:pointer;font-size:18px" onclick="toggleSettings()">✕</span>
+  </div>
+  <h3>Account</h3>
+  <label>Email</label><input type="text" id="s-email" readonly>
+  <h3>Trading Config</h3>
+  <label>Trade Method</label><select id="s-method"><option>MIS</option><option>NRML</option></select>
+  <label>Order Type</label><select id="s-order"><option>Market Order</option><option>Limit Order</option></select>
+  <label>Entry Signal</label><select id="s-entry"><option>STR</option><option>DSTR</option><option>POC</option></select>
+  <label>Exit Signal</label><select id="s-exit"><option>DSTR</option><option>NONE</option></select>
+  <label>Target %</label><input type="number" id="s-target" value="3.0" step="0.5">
+  <label>Stop Loss %</label><input type="number" id="s-sl" value="3.0" step="0.5">
+  <label>Square Off Time</label><input type="time" id="s-sqtime" value="15:15">
+  <div class="s-toggle"><span>Trailing SL</span><label class="switch"><input type="checkbox" id="s-tsl"><span class="slider-toggle"></span></label></div>
+  <h3>Data</h3>
+  <label>Refresh Interval (sec)</label><input type="number" id="s-interval" value="30" min="10" max="300">
+  <div class="s-toggle"><span>Auto Refresh</span><label class="switch"><input type="checkbox" id="s-autorefresh" checked><span class="slider-toggle"></span></label></div>
+  <h3>Display</h3>
+  <div class="s-toggle"><span>Dark Mode</span><label class="switch"><input type="checkbox" id="s-dark" onchange="toggleDarkMode()"><span class="slider-toggle"></span></label></div>
+  <div class="s-toggle"><span>Show VWAP</span><label class="switch"><input type="checkbox" id="s-vwap" checked onchange="renderCharts()"><span class="slider-toggle"></span></label></div>
+  <div class="s-toggle"><span>Show Volume</span><label class="switch"><input type="checkbox" id="s-vol" checked onchange="renderCharts()"><span class="slider-toggle"></span></label></div>
+  <h3>Alerts</h3>
+  <div class="s-toggle"><span>Browser Notifications</span><label class="switch"><input type="checkbox" id="s-notif" onchange="toggleNotifPerm()"><span class="slider-toggle"></span></label></div>
+  <div class="s-toggle"><span>Sound Alert</span><label class="switch"><input type="checkbox" id="s-sound" checked><span class="slider-toggle"></span></label></div>
+  <label>Alert on Signal Flip</label><select id="s-alertsig"><option value="all">Every flip</option><option value="directional">Directional only</option><option value="none">Off</option></select>
+  <h3>Trade Journal</h3>
+  <div class="s-toggle"><span>Auto-save Trades</span><label class="switch"><input type="checkbox" id="s-autosave" checked><span class="slider-toggle"></span></label></div>
+  <button class="settings-btn" onclick="manualRefresh()">🔄 Refresh Now</button>
+  <button class="settings-btn danger" onclick="logout()">🚪 Logout</button>
+</div>
+
+<button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobilePanel()"><i class="fas fa-bars"></i></button>
+<div class="toast" id="toast"></div>
+<div class="notif-badge" id="notifBadge"></div>
+
+<!-- CDN dependencies (loaded before module) -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<!-- App entry point -->
+<script type="module" src="js/boot.js"></script>
+</body>
+</html>
